@@ -1,0 +1,16 @@
+stages:
+  - sync
+
+sync_to_github:
+  stage: sync
+  image: alpine
+  before_script:
+    - apk add --no-cache git openssh
+    - git config --global user.email "web.renatolira@gmail.com"
+    - git config --global user.name "Renato Lira"
+  script:
+    - echo "Sincronizando com o GitHub..."
+    - git remote add github "https://oauth2:${GITHUB_TOKEN}@github.com/${GITHUB_REPO}.git" || echo "Remoto já adicionado"
+    - git fetch --all
+    - export BRANCH_NAME=$(echo $CI_COMMIT_REF_NAME)
+    - git push github HEAD:refs/heads/$BRANCH_NAME

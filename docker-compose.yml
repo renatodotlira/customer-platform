@@ -1,0 +1,42 @@
+version: '3'
+
+services:
+  # Banco de dados PostgreSQL
+  postgres:
+    image: postgres:14
+    container_name: postgres_db
+    restart: always
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: 1234567890
+      POSTGRES_DB: cutscheduler
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - backend
+    ports:
+      - "5432:5432" 
+
+  # pgAdmin
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    restart: always
+    ports:
+      - "5050:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@inechat.com
+      PGADMIN_DEFAULT_PASSWORD: 1234567890
+    depends_on:
+      - postgres
+    networks:
+      - backend
+
+# Volumes para persistir os dados
+volumes:
+  postgres_data:
+
+# Rede para conectar os serviços
+networks:
+  backend:
+    driver: bridge

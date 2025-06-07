@@ -1,0 +1,11 @@
+import { HttpStatus } from "../../presentation/routers/index.route";
+
+export class NotFoundException {
+  constructor(...objectError: any[]) {
+    throw {
+      status: HttpStatus.NOT_FOUND,
+      error: 'Not Found',
+      message: objectError.length > 0 ? objectError : undefined,
+    };
+  }
+}
