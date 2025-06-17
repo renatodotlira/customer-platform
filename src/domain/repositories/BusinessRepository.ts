@@ -12,7 +12,6 @@ export class BusinessRepository implements IBusinessRepository {
 	}
 	async create(business: BusinessAttributes): Promise<Business> {
 		this.logger.info(`start method save`);
-		console.log(business);
 		const response = await Business.create(business).catch((error) => {
 			this.logger.error(`Error creating business: ${error.message}`);
 			throw new Error(`Error creating business: ${error.message}`);
@@ -21,6 +20,17 @@ export class BusinessRepository implements IBusinessRepository {
 		this.logger.info(`end method save`);
 		return response;
 	}
+
+	async update(business: BusinessAttributes): Promise<any> {
+		this.logger.info(`start method update`);
+		const response = await Business.update(business, {
+				where: { id: business.id }
+			});
+		console.log(response);
+		this.logger.info(`end method update`);
+		return response;
+	}
+
 	findAll(): Promise<Business[]> {
 		throw new Error("Method not implemented.");
 	}

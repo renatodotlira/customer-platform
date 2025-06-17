@@ -13,6 +13,7 @@ export interface UserAttributes {
   emailConfirmed?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
+  status?: string;
 }
 interface UserCreationAttributes extends Optional<UserAttributes, 'id'> { }
 
@@ -26,6 +27,7 @@ class UserAccount extends Model<UserAttributes, UserCreationAttributes> implemen
   public emailConfirmed!: boolean;
   public createdAt!: Date;
   public updatedAt!: Date;
+  public status?: string;
 }
 
 UserAccount.init({
@@ -61,6 +63,9 @@ UserAccount.init({
     type: DataTypes.DATE,
     allowNull: true,
     defaultValue: DataTypes.NOW
+  },
+  status: {
+    type: DataTypes.STRING
   }
 }, {
   sequelize,

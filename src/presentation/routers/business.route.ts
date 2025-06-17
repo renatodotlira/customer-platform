@@ -14,6 +14,7 @@ const businessController = new BusinessController(businessFactory);
 
 // Routes
 router.post('/:userId', businessController.createAndLinkToUserAccount.bind(businessController))
+router.put('/', businessController.createAndLinkToUserAccount.bind(businessController))
 
 
 export { router as businessRoutes };

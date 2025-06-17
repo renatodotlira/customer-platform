@@ -5,6 +5,7 @@ import { appointmentRoutes } from './appointment.route';
 import { employeeRoutes } from './employee.route';
 import { whatsappInstanceRoutes } from './whatsappInstance.route';
 import { businessRoutes } from './business.route';
+import { serviceRoutes } from './service.route';
 
 enum HttpStatus {
   OK = 200,
@@ -52,5 +53,6 @@ router.use('/appointment', appointmentRoutes)
 router.use('/employee', employeeRoutes)
 router.use('/whatsapp-instance', whatsappInstanceRoutes)
 router.use('/business', businessRoutes);
+router.use('/service', serviceRoutes);
 
 export { HttpStatus, router };
