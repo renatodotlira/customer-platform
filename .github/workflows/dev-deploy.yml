@@ -53,7 +53,7 @@ jobs:
               }
             }
             EOF
-
+            echo $QUERY
             echo "2.Fetching PR data for PR #$PR_NUMBER in repository $REPO with owner $OWNER"
             PR_DATA=$(curl -s -H "Authorization: bearer $GH_TOKEN" \
               -X POST https://api.github.com/graphql \
