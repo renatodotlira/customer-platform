@@ -31,6 +31,7 @@ jobs:
             apt-get update && apt-get install -y jq
 
         - name: Get PR state
+          continue-on-error: true
           if: ${{ github.event_name == 'pull_request' }}
           env:
             GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -40,7 +41,7 @@ jobs:
             PR_NUMBER=${{ github.event.pull_request.number }}            
             REPO=${{ github.repository }}
             OWNER=${{ github.repository_owner }}
-
+            echo "Fetching PR data for PR #$PR_NUMBER in repository $REPO with owner $OWNER"
             read -r -d '' QUERY <<EOF
             query (\$OWNER: String!, \$REPO: String!, \$PR_NUMBER: Int!) {
               repository(owner: \$OWNER, name: \$REPO) {
@@ -53,7 +54,7 @@ jobs:
             }
             EOF
 
-            echo "Fetching PR data for PR #$PR_NUMBER in repository $REPO with owner $OWNER"
+            echo "2.Fetching PR data for PR #$PR_NUMBER in repository $REPO with owner $OWNER"
             PR_DATA=$(curl -s -H "Authorization: bearer $GH_TOKEN" \
               -X POST https://api.github.com/graphql \
               -H "Content-Type: application/json" \
