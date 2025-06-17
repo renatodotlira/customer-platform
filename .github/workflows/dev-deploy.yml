@@ -39,7 +39,7 @@ jobs:
           run: |
             echo "Trying to get PR state"
             PR_NUMBER=${{ github.event.pull_request.number }}            
-            REPO=${{ github.repository }}
+            REPO=$(echo "${{ github.repository }}" | cut -d'/' -f2)
             OWNER=${{ github.repository_owner }}
             echo "Fetching PR data for PR #$PR_NUMBER in repository $REPO with owner $OWNER"
             QUERY=$(cat <<'EOF'
