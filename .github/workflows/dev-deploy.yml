@@ -42,10 +42,10 @@ jobs:
             REPO=${{ github.repository }}
             OWNER=${{ github.repository_owner }}
             echo "Fetching PR data for PR #$PR_NUMBER in repository $REPO with owner $OWNER"
-            read -r -d '' QUERY <<EOF
-            query (\$OWNER: String!, \$REPO: String!, \$PR_NUMBER: Int!) {
-              repository(owner: \$OWNER, name: \$REPO) {
-                pullRequest(number: \$PR_NUMBER) {
+            QUERY=$(cat <<'EOF'
+            query ($OWNER: String!, $REPO: String!, $PR_NUMBER: Int!) {
+              repository(owner: $OWNER, name: $REPO) {
+                pullRequest(number: $PR_NUMBER) {
                   number
                   state
                   merged
@@ -53,6 +53,7 @@ jobs:
               }
             }
             EOF
+            )
             echo $QUERY
             echo "2.Fetching PR data for PR #$PR_NUMBER in repository $REPO with owner $OWNER"
             PR_DATA=$(curl -s -H "Authorization: bearer $GH_TOKEN" \
