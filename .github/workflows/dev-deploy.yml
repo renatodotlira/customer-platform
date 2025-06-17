@@ -1,0 +1,108 @@
+name: dev-deploy
+
+on:
+    pull_request:
+      types: [opened, synchronize]
+
+permissions:
+    actions: read
+    contents: write
+    deployments: write
+    pull-requests: read
+
+env:
+    PROJECT_ID: customer-platform
+    TAG: ${{ github.event.pull_request.number && format('pr-{0}', github.event.pull_request.number) }}
+    SERVICE_MEMORY: 2Gi
+
+jobs:
+    test:
+      runs-on: ubuntu-latest
+      container:
+        image: google/cloud-sdk:slim
+      steps:
+        - name: Checkout code
+          uses: actions/checkout@v3
+        
+
+        - name: Install jq
+          if: ${{ github.event_name == 'pull_request' }}
+          run: |
+            apt-get update && apt-get install -y jq
+
+        - name: Get PR state
+          continue-on-error: true
+          if: ${{ github.event_name == 'pull_request' }}
+          env:
+            GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          shell: bash
+          run: |
+            echo "Trying to get PR state"
+            PR_NUMBER=${{ github.event.pull_request.number }}            
+            REPO=$(echo "${{ github.repository }}" | cut -d'/' -f2)
+            OWNER=${{ github.repository_owner }}
+            echo "Fetching PR data for PR #$PR_NUMBER in repository $REPO with owner $OWNER"
+            QUERY=$(cat <<'EOF'
+            query ($OWNER: String!, $REPO: String!, $PR_NUMBER: Int!) {
+              repository(owner: $OWNER, name: $REPO) {
+                pullRequest(number: $PR_NUMBER) {
+                  number
+                  state
+                  merged
+                }
+              }
+            }
+            EOF
+            )
+            echo $QUERY
+            echo "2.Fetching PR data for PR #$PR_NUMBER in repository $REPO with owner $OWNER"
+            PR_DATA=$(curl -s -H "Authorization: bearer $GH_TOKEN" \
+              -X POST https://api.github.com/graphql \
+              -H "Content-Type: application/json" \
+              -d "$(jq -n \
+                    --arg query "$QUERY" \
+                    --arg OWNER "$OWNER" \
+                    --arg REPO "$REPO" \
+                    --argjson PR_NUMBER "$PR_NUMBER" \
+                    '{query: $query, variables: {OWNER: $OWNER, REPO: $REPO, PR_NUMBER: $PR_NUMBER}}')")
+
+            echo "$PR_DATA"
+
+            echo "Extracting PR state"
+            PR_STATE=$(echo "$PR_DATA" | jq -r '.data.repository.pullRequest.state')
+
+            echo "State of PR: $PR_STATE"
+            echo "PR_STATE=$PR_STATE" >> $GITHUB_ENV
+
+        - name: Get GCP Secrets
+          continue-on-error: true
+          id: gcp-secrets
+          uses: google-github-actions/get-secretmanager-secrets@v2
+          with:
+              secrets: |
+                  WRISTBAND_API_URL:thoughtlead-development/API_SECRET_WRISTBAND_API_URL
+                  WRISTBAND_CLIENT_ID:thoughtlead-development/${{ env.TAG }}-wristband-client-id
+                  WRISTBAND_CLIENT_SECRET:thoughtlead-development/${{ env.TAG }}-wristband-client-secret
+                  WRISTBAND_MACHINE_CLIENT_ID:thoughtlead-development/API_SECRET_WRISTBAND_MACHINE_CLIENT_ID
+                  WRISTBAND_MACHINE_CLIENT_SECRET:thoughtlead-development/API_SECRET_WRISTBAND_MACHINE_CLIENT_SECRET
+
+        - name: Run API Dev Cleanup Action If PR Closed
+          if: env.PR_STATE == 'closed'
+          uses: ./.github/actions/api-dev-cleanup
+          with:
+            github_token: ${{ secrets.GITHUB_TOKEN }}
+            gcp_sa_key: ${{ secrets.GCP_SA_KEY_DEV }}
+            project_id: thoughtlead-development
+            region: us-east4
+            service: api
+            tag: ${{ env.TAG }}
+            db_name: thoughtly-development
+            db_password: ${{ env.DB_PASSWORD }}
+            db_port: 5440
+            db_username: ${{ env.TAG }}
+            wristband_api_url: ${{ steps.gcp-secrets.outputs.WRISTBAND_API_URL }}
+            wristband_client_id: ${{ steps.gcp-secrets.outputs.WRISTBAND_CLIENT_ID }}
+            wristband_client_secret: ${{ steps.gcp-secrets.outputs.WRISTBAND_CLIENT_SECRET }}
+            wristband_machine_client_id: ${{ steps.gcp-secrets.outputs.WRISTBAND_MACHINE_CLIENT_ID }}
+            wristband_machine_client_secret: ${{ steps.gcp-secrets.outputs.WRISTBAND_MACHINE_CLIENT_SECRET }}
+    

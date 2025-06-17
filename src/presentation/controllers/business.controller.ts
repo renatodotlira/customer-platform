@@ -28,5 +28,22 @@ export class BusinessController {
       res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({message:'Não foi possível criar a empresa'})
     }
   }
+
+    async update(req: Request, res: Response) {
+    try {
+      const { companyName, companyType, companySize, id } = req.body;
+      const business: BusinessAttributes = {
+        id: id,
+        name: companyName,
+        type: companyType,
+        size: companySize
+      }
+      this.logger.info(`Creating business: ${JSON.stringify(business)}`);
+			const resp = await this.businessCases.updateBusiness.execute(business);
+			res.json(resp);
+    } catch (error) {
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({message:'Não foi possível criar a empresa'})
+    }
+  }
 }
 

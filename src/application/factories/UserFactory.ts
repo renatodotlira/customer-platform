@@ -1,6 +1,7 @@
 import { UserRepository } from "../../domain/repositories/UserRepository";
 import { EmailService } from "../../infrastructure/services/email/email.service";
 import { OtpRepository } from "../../domain/repositories/OtpRepository";
+import { BusinessRepository } from "../../domain/repositories/BusinessRepository";
 import { CreateUserUseCase } from "../usecases/user/CreateUserUseCase";
 import { GetUserByIdUseCase } from "../usecases/user/GetUserByIdUseCase";
 import { GoogleLoginUserCase } from "../usecases/user/GoogleLoginUseCase";
@@ -16,11 +17,11 @@ export class UserFactory {
 	public readonly confirmEmailUser: ConfirmEmailUserCase;
 	public readonly addBusinessIdUseCase: AddBusinessIdUseCase;
 
-	constructor(userRepository: UserRepository) {
+	constructor(userRepository: UserRepository, businessRepository: BusinessRepository) {
 		const otpRepository = new OtpRepository();
 		const emailService = new EmailService(otpRepository);
 		this.getUserById = new GetUserByIdUseCase(userRepository);
-		this.createUser = new CreateUserUseCase(userRepository, emailService);
+		this.createUser = new CreateUserUseCase(userRepository, emailService, businessRepository);
 		this.loginUser = new UserLoginUserCase(userRepository);
 		this.googleLoginUser = new GoogleLoginUserCase(userRepository);
 		this.confirmEmailUser = new ConfirmEmailUserCase(userRepository, otpRepository);

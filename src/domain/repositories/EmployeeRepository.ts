@@ -1,6 +1,8 @@
 import { IEmployeeRepository } from "../../application/interfaces/IEmployeeRepository";
 import { Logger } from "../../infrastructure/configs/logger.config";
 import Employee, { EmployeeAttributes } from "../entities/employee.model";
+import RelationEmployeeService from "../entities/relationEmployeeService.model";
+import Service from "../entities/service.model";
 
 export class EmployeeRepository implements IEmployeeRepository {
 
@@ -8,7 +10,15 @@ export class EmployeeRepository implements IEmployeeRepository {
 	
 	async findAll(businessId: string): Promise<Employee[]> {
 		this.logger.info(`Fetching all employees for business ID: ${businessId}`);
-		return await Employee.findAll({ where: { businessId: businessId } })
+		return await Employee.findAll({ 
+			where: { businessId: businessId },
+			include: [
+			  {
+				model: RelationEmployeeService,
+				as: 'employeeServices',
+				include: [{ model: Service, as: 'service' }]
+			  }]
+			})
 			.catch(error => {
 				this.logger.error(`Error fetching employees for business ID ${businessId}: ${error.message}`);
 				throw error;

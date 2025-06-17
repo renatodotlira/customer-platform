@@ -41,7 +41,7 @@ class ServiceDto {
     this.price = service.price;
     this.duration = service.duration;
   }
-  public id!: number;
+  public id!: string;
   public name!: string;
   public price!: number;
   public duration!: number;

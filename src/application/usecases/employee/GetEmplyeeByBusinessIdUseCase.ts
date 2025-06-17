@@ -10,8 +10,9 @@ export class GetEmplyeeByBusinessIdUserCase {
 
 	async execute(businessId: string): Promise<Employee[]> {
 		this.logger.info(`Fetching employees for business ID: ${businessId}`);
-		const appointments = await this.employeeRepository.findAll(businessId);
-		this.logger.info(`Found ${appointments.length} employees for business ID: ${businessId}`);
-		return appointments;
+		const employees = await this.employeeRepository.findAll(businessId);
+		this.logger.info(`Found ${employees.length} employees for business ID: ${businessId}`);
+		console.log(employees);
+		return employees;
 	}
 }

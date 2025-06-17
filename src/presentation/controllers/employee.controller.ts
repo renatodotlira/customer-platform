@@ -38,4 +38,28 @@ export class EmployeeController {
     }
   }
 
+  async attachServiceToEmployee(req: Request, res: Response) {
+    try {
+      this.logger.info(`Attaching service to employee: ${req.params.employeeId}`);
+      const { employeeId, businessId, serviceId } = req.params;
+      await this.useCases.attachServiceToEmployee.execute(Number(employeeId), businessId, serviceId);
+      res.status(HttpStatus.CREATED).json({ message: 'Serviço adicionado com sucesso ao profissional' });
+    } catch (error) {
+      this.logger.error(`Error attaching service to employee: ${error.message}`);
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: 'Não foi possível adicionar o serviço ao profissional' });
+    }
+  }
+
+  async detachServiceFromEmployee(req: Request, res: Response) {
+    try {
+      this.logger.info(`Detaching service from employee: ${req.params.employeeId}`);
+      const { employeeId, businessId, serviceId } = req.params;
+      await this.useCases.detachServiceFromEmployee.execute(Number(employeeId), businessId, serviceId);
+      res.status(HttpStatus.OK).json({ message: 'Serviço removido com sucesso do profissional' });
+    } catch (error) {
+      this.logger.error(`Error detaching service from employee: ${error.message}`);
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: 'Não foi possível remover o serviço do profissional' });
+    }
+  }
+
 }

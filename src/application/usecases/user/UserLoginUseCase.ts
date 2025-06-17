@@ -17,6 +17,11 @@ export class UserLoginUserCase {
 		if (!userAccount) {
 			throw new BadRequestException("Usuário não encontrado.");
 		}
+
+		if (userAccount.emailConfirmed === false) {
+			throw new BadRequestException("Valide o seu email para poder logar");
+
+		}
 		
 		const isValid = await bcrypt.compare(password, userAccount.password);
 		if (!isValid) {
@@ -29,10 +34,14 @@ export class UserLoginUserCase {
 		const token = jwt.sign({ userAccountId: userAccount.id, businessId: userAccount.businessId, roles: roles }, configService.get("AUTHENTICATION").JWT.SECRET, {
 			expiresIn: configService.get("AUTHENTICATION").JWT.EXPIRIN_IN,
 		});
+
+		
+
 		this.logger.info(`start method UserLoginUserCase`);
 		return {
 			token: token,
 			businessId: userAccount.businessId,
+			status: userAccount.status,
 			userId: userAccount.id,
 		};
 	}

@@ -7,9 +7,14 @@ import bcrypt from 'bcryptjs';
 import Role from "../../../domain/entities/role.model";
 import RelationUserAccountRole from "../../../domain/entities/relationUserAccountRoles.model";
 import { v4 as uuidv4 } from 'uuid';
+import { BusinessRepository } from "../../../domain/repositories/BusinessRepository";
+import { BusinessAttributes } from "../../../domain/entities/business.model";
 
 export class CreateUserUseCase {
-  constructor(private userRepository: UserRepository, private readonly emailService: EmailService) {}
+  constructor(private userRepository: UserRepository, 
+    private readonly emailService: EmailService,
+    private businessRepository: BusinessRepository,
+  ) {}
 
   async execute(user: UserAttributes): Promise<User | null> {
     try {
@@ -20,7 +25,15 @@ export class CreateUserUseCase {
       const passwordEncrypted = await bcrypt.hash(user.password, 10);
       const role = await Role.findOne({ where: { name: "ADMIN"}});
       
-      const newUser = await this.userRepository.save({  id: uuidv4(), email: user.email, password: passwordEncrypted});
+      const newBusiness: BusinessAttributes = {
+              id: uuidv4()
+            }
+      await this.businessRepository.create(newBusiness);
+
+      const newUser = await this.userRepository.save(
+        {  id: uuidv4(), email: user.email, password: passwordEncrypted, businessId: newBusiness.id, status: 'CREATED'}
+      );
+      
       if (role) {
         await RelationUserAccountRole.create({
           userAccountId: newUser.id,

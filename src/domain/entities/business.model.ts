@@ -3,9 +3,9 @@ import sequelize from '../../infrastructure/database';
 
 export interface BusinessAttributes {
   id?: string;
-  name: string;
-  type: string;
-  size: string;
+  name?: string;
+  type?: string;
+  size?: string;
 }
 
 interface BusinessCreationAttributes extends Optional<BusinessAttributes, 'id'> { }
@@ -25,15 +25,12 @@ Business.init({
   },
   name: {
     type: DataTypes.STRING,
-    allowNull: false
   },
   type: {
     type: DataTypes.STRING,
-    allowNull: false
   },
   size: {
     type: DataTypes.STRING,
-    allowNull: false
   }
 }, {
   sequelize,

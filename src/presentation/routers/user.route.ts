@@ -2,12 +2,14 @@ import { Router } from "express";
 import { UserRepository } from "../../domain/repositories/UserRepository";
 import { UserController } from "../controllers/user.controller";
 import { UserFactory } from "../../application/factories/UserFactory";
+import { BusinessRepository } from "../../domain/repositories/BusinessRepository";
 
 const router = Router();
 
 // Dependency Injection
 const userRepository = new UserRepository();
-const userFactory = new UserFactory(userRepository);
+const businessRepository = new BusinessRepository();
+const userFactory = new UserFactory(userRepository, businessRepository);
 const userController = new UserController(userFactory);
 
 // Routes
